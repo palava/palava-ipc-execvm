@@ -43,13 +43,13 @@ import de.cosmocode.palava.ipc.IpcCommandNotAvailableException;
  * @author Willi Schoenborn
  */
 final class LocalIpcCommandExecutor implements IpcCommandExecutor {
-    
+
     private static final Logger LOG = LoggerFactory.getLogger(LocalIpcCommandExecutor.class);
 
     private final ConcurrentMap<String, Class<? extends IpcCommand>> cache = new MapMaker().softValues().makeMap();
-    
+
     private final Injector injector;
-    
+
     private final IpcCallFilterChainFactory chainFactory;
 
     @Inject
@@ -61,9 +61,9 @@ final class LocalIpcCommandExecutor implements IpcCommandExecutor {
     @Override
     public Map<String, Object> execute(final String name, final IpcCall call) throws IpcCommandExecutionException {
         Preconditions.checkNotNull(call, "Call");
-        
+
         final Class<? extends IpcCommand> commandClass;
-        
+
         try {
             commandClass = load(name);
         } catch (ClassNotFoundException e) {
@@ -72,23 +72,23 @@ final class LocalIpcCommandExecutor implements IpcCommandExecutor {
             // caller should not know the difference between "class not found" and "class is no command"
             throw new IpcCommandNotAvailableException(name, e);
         }
-        
+
         final IpcCommand command = injector.getInstance(commandClass);
         final IpcCallFilterChain chain = chainFactory.create(new IpcCallFilterChain() {
-            
+
             @Override
             public Map<String, Object> filter(IpcCall call, IpcCommand command) throws IpcCommandExecutionException {
                 final Map<String, Object> result = Maps.newLinkedHashMap();
-                LOG.trace("Executing {} for {}", command, name);
+                LOG.debug("Executing {}", command);
                 command.execute(call, result);
                 return result;
             }
-            
+
         });
-        
+
         return chain.filter(call, command);
     }
-    
+
     private Class<? extends IpcCommand> load(String name) throws ClassNotFoundException {
         final Class<? extends IpcCommand> cached = cache.get(name);
         if (cached == null) {
@@ -102,5 +102,5 @@ final class LocalIpcCommandExecutor implements IpcCommandExecutor {
             return cached;
         }
     }
-    
+
 }
