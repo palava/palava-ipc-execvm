@@ -14,27 +14,26 @@
  * limitations under the License.
  */
 
-package de.cosmocode.palava.ipc.command.localvm;
+package de.cosmocode.palava.ipc.execvm;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
-
 import de.cosmocode.palava.ipc.IpcCommandExecutor;
-import de.cosmocode.palava.ipc.execvm.LocalExecutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Binds {@link IpcCommandExecutor} to {@link de.cosmocode.palava.ipc.execvm.LocalExecutor}.
  *
- * @deprecated use {@link de.cosmocode.palava.ipc.execvm.LocalExecutorModule} instead
- * @since 1.0 
- * @author Willi Schoenborn
+ * @since 1.1
+ * @author Tobias Sarnowski
  */
-public final class LocalIpcCommandExecutorModule implements Module {
+public class LocalExecutorModule implements Module {
+    private static final Logger LOG = LoggerFactory.getLogger(LocalExecutorModule.class);
 
     @Override
     public void configure(Binder binder) {
         binder.bind(IpcCommandExecutor.class).to(LocalExecutor.class).in(Singleton.class);
     }
-
 }

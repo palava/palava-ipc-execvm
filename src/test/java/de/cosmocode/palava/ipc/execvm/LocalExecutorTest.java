@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package de.cosmocode.palava.ipc.command.localvm;
+package de.cosmocode.palava.ipc.execvm;
 
 import com.google.inject.Guice;
 import com.google.inject.Injector;
@@ -25,17 +25,17 @@ import de.cosmocode.palava.ipc.IpcCallFilterChainFactory;
 import de.cosmocode.palava.ipc.IpcCommandExecutor;
 
 /**
- * Tests {@link LocalVMIpcCommandExecutor}.
+ * Tests {@link LocalExecutor}.
  *
  * @author Willi Schoenborn
  */
-public final class LocalVMIpcCommandExecutorTest extends AbstractIpcCommandExecutorTest {
+public final class LocalExecutorTest extends AbstractIpcCommandExecutorTest {
 
     @Override
     protected IpcCommandExecutor unit() {
         final Injector injector = Guice.createInjector(new DefaultIpcCallFilterChainFactoryModule());
         final IpcCallFilterChainFactory factory = injector.getInstance(IpcCallFilterChainFactory.class);
-        return new LocalIpcCommandExecutor(injector, factory);
+        return new LocalExecutor(injector, factory);
     }
 
 }

@@ -14,27 +14,19 @@
  * limitations under the License.
  */
 
-package de.cosmocode.palava.ipc.command.localvm;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package de.cosmocode.palava.ipc.execvm;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import de.cosmocode.palava.ipc.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import de.cosmocode.palava.ipc.IpcCall;
-import de.cosmocode.palava.ipc.IpcCallFilterChain;
-import de.cosmocode.palava.ipc.IpcCallFilterChainFactory;
-import de.cosmocode.palava.ipc.IpcCommand;
-import de.cosmocode.palava.ipc.IpcCommandExecutionException;
-import de.cosmocode.palava.ipc.IpcCommandExecutor;
-import de.cosmocode.palava.ipc.IpcCommandNotAvailableException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Implements the {@link IpcCommandExecutor} with local vm class lookups.
@@ -42,9 +34,9 @@ import de.cosmocode.palava.ipc.IpcCommandNotAvailableException;
  * @author Tobias Sarnowski
  * @author Willi Schoenborn
  */
-final class LocalIpcCommandExecutor implements IpcCommandExecutor {
+public final class LocalExecutor implements IpcCommandExecutor {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LocalIpcCommandExecutor.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LocalExecutor.class);
 
     private final ConcurrentMap<String, Class<? extends IpcCommand>> cache = new MapMaker().softValues().makeMap();
 
@@ -53,7 +45,7 @@ final class LocalIpcCommandExecutor implements IpcCommandExecutor {
     private final IpcCallFilterChainFactory chainFactory;
 
     @Inject
-    protected LocalIpcCommandExecutor(Injector injector, IpcCallFilterChainFactory chainFactory) {
+    protected LocalExecutor(Injector injector, IpcCallFilterChainFactory chainFactory) {
         this.injector = Preconditions.checkNotNull(injector, "Injector");
         this.chainFactory = Preconditions.checkNotNull(chainFactory, "ChainFactory");
     }
@@ -80,7 +72,15 @@ final class LocalIpcCommandExecutor implements IpcCommandExecutor {
             public Map<String, Object> filter(IpcCall call, IpcCommand command) throws IpcCommandExecutionException {
                 final Map<String, Object> result = Maps.newLinkedHashMap();
                 LOG.debug("Executing {}", command);
-                command.execute(call, result);
+                try {
+                    command.execute(call, result);
+                } catch (IpcCommandExecutionException e) {
+                    LOG.debug("An expected exception was thrown while executing " + command, e);
+                    throw e;
+                } catch (RuntimeException e) {
+                    LOG.error("An unexpected exception was thrown while executing " + command, e);
+                    throw e;
+                }
                 return result;
             }
 
