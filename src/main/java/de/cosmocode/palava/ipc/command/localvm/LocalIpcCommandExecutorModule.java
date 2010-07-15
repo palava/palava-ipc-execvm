@@ -27,9 +27,11 @@ import de.cosmocode.palava.ipc.execvm.LocalExecutor;
  * Binds {@link IpcCommandExecutor} to {@link de.cosmocode.palava.ipc.execvm.LocalExecutor}.
  *
  * @deprecated use {@link de.cosmocode.palava.ipc.execvm.LocalExecutorModule} instead
+ * 
  * @since 1.0 
  * @author Willi Schoenborn
  */
+@Deprecated
 public final class LocalIpcCommandExecutorModule implements Module {
 
     @Override

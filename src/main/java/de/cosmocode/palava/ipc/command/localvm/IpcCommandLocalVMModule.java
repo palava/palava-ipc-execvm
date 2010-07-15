@@ -26,6 +26,7 @@ import de.cosmocode.palava.ipc.execvm.LocalExecutor;
  * Binds {@link IpcCommandExecutor} to {@link de.cosmocode.palava.ipc.execvm.LocalExecutor}.
  *
  * @deprecated use {@link de.cosmocode.palava.ipc.execvm.LocalExecutorModule} instead
+ * 
  * @author Tobias Sarnowski
  * @author Willi Schoenborn
  */

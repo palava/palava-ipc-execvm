@@ -16,17 +16,24 @@
 
 package de.cosmocode.palava.ipc.execvm;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.MapMaker;
-import com.google.common.collect.Maps;
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-import de.cosmocode.palava.ipc.*;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+
+import de.cosmocode.commons.reflect.Classes;
+import de.cosmocode.palava.ipc.IpcCall;
+import de.cosmocode.palava.ipc.IpcCallFilterChain;
+import de.cosmocode.palava.ipc.IpcCallFilterChainFactory;
+import de.cosmocode.palava.ipc.IpcCommand;
+import de.cosmocode.palava.ipc.IpcCommandExecutionException;
+import de.cosmocode.palava.ipc.IpcCommandExecutor;
+import de.cosmocode.palava.ipc.IpcCommandNotAvailableException;
 
 /**
  * Implements the {@link IpcCommandExecutor} with local vm class lookups.
@@ -37,9 +44,7 @@ import java.util.concurrent.ConcurrentMap;
 public final class LocalExecutor implements IpcCommandExecutor {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalExecutor.class);
-
-    private final ConcurrentMap<String, Class<? extends IpcCommand>> cache = new MapMaker().softValues().makeMap();
-
+    
     private final Injector injector;
 
     private final IpcCallFilterChainFactory chainFactory;
@@ -57,50 +62,50 @@ public final class LocalExecutor implements IpcCommandExecutor {
         final Class<? extends IpcCommand> commandClass;
 
         try {
-            commandClass = load(name);
+            commandClass = Classes.forName(name).asSubclass(IpcCommand.class);
         } catch (ClassNotFoundException e) {
-            throw new IpcCommandNotAvailableException(name, e);
+            LOG.error("Unable to load command class: {}", e);
+            throw new IpcCommandNotAvailableException(name);
         } catch (ClassCastException e) {
+            LOG.error("Unable to cast as command class: {}", e);
             // caller should not know the difference between "class not found" and "class is no command"
-            throw new IpcCommandNotAvailableException(name, e);
+            throw new IpcCommandNotAvailableException(name);
         }
 
         final IpcCommand command = injector.getInstance(commandClass);
-        final IpcCallFilterChain chain = chainFactory.create(new IpcCallFilterChain() {
-
-            @Override
-            public Map<String, Object> filter(IpcCall call, IpcCommand command) throws IpcCommandExecutionException {
-                final Map<String, Object> result = Maps.newLinkedHashMap();
-                LOG.debug("Executing {}", command);
-                try {
-                    command.execute(call, result);
-                } catch (IpcCommandExecutionException e) {
-                    LOG.debug("An expected exception was thrown while executing " + command, e);
-                    throw e;
-                } catch (RuntimeException e) {
-                    LOG.error("An unexpected exception was thrown while executing " + command, e);
-                    throw e;
-                }
-                return result;
-            }
-
-        });
-
+        final IpcCallFilterChain chain = chainFactory.create(ExecutingFilterChain.INSTANCE);
         return chain.filter(call, command);
     }
-
-    private Class<? extends IpcCommand> load(String name) throws ClassNotFoundException {
-        final Class<? extends IpcCommand> cached = cache.get(name);
-        if (cached == null) {
-            final Class<?> raw = Class.forName(name);
-            final Class<? extends IpcCommand> type = raw.asSubclass(IpcCommand.class);
-            LOG.trace("Putting {}/{} into cache", name, type);
-            cache.put(name, type);
-            return type;
-        } else {
-            LOG.trace("Returning {} from cache", cached);
-            return cached;
+    
+    /**
+     * A {@link IpcCallFilterChain} implementation that executes the given command.
+     *
+     * @author Willi Schoenborn
+     */
+    private enum ExecutingFilterChain implements IpcCallFilterChain {
+        
+        INSTANCE;
+        
+        @Override
+        public Map<String, Object> filter(IpcCall call, IpcCommand command) throws IpcCommandExecutionException {
+            final Map<String, Object> result = Maps.newLinkedHashMap();
+            LOG.debug("Executing {}", command);
+            
+            try {
+                command.execute(call, result);
+            } catch (IpcCommandExecutionException e) {
+                LOG.debug("An expected exception was thrown while executing " + command, e);
+                throw e;
+                /* CHECKSTYLE:OFF */
+            } catch (RuntimeException e) {
+                /* CHECKSTYLE:ON */
+                LOG.error("An unexpected exception was thrown while executing " + command, e);
+                throw e;
+            }
+            
+            return result;
         }
+        
     }
 
 }

@@ -19,9 +19,8 @@ package de.cosmocode.palava.ipc.execvm;
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Singleton;
+
 import de.cosmocode.palava.ipc.IpcCommandExecutor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Binds {@link IpcCommandExecutor} to {@link de.cosmocode.palava.ipc.execvm.LocalExecutor}.
@@ -30,10 +29,10 @@ import org.slf4j.LoggerFactory;
  * @author Tobias Sarnowski
  */
 public class LocalExecutorModule implements Module {
-    private static final Logger LOG = LoggerFactory.getLogger(LocalExecutorModule.class);
 
     @Override
     public void configure(Binder binder) {
         binder.bind(IpcCommandExecutor.class).to(LocalExecutor.class).in(Singleton.class);
     }
+    
 }
