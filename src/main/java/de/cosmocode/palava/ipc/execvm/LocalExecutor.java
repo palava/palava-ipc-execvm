@@ -26,7 +26,7 @@ import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-import de.cosmocode.commons.reflect.Classes;
+import de.cosmocode.commons.reflect.Reflection;
 import de.cosmocode.palava.ipc.IpcCall;
 import de.cosmocode.palava.ipc.IpcCallFilterChain;
 import de.cosmocode.palava.ipc.IpcCallFilterChainFactory;
@@ -41,7 +41,7 @@ import de.cosmocode.palava.ipc.IpcCommandNotAvailableException;
  * @author Tobias Sarnowski
  * @author Willi Schoenborn
  */
-public final class LocalExecutor implements IpcCommandExecutor {
+final class LocalExecutor implements IpcCommandExecutor {
 
     private static final Logger LOG = LoggerFactory.getLogger(LocalExecutor.class);
     
@@ -62,7 +62,7 @@ public final class LocalExecutor implements IpcCommandExecutor {
         final Class<? extends IpcCommand> commandClass;
 
         try {
-            commandClass = Classes.forName(name).asSubclass(IpcCommand.class);
+            commandClass = Reflection.forName(name).asSubclass(IpcCommand.class);
         } catch (ClassNotFoundException e) {
             LOG.error("Unable to load command class: {}", e);
             throw new IpcCommandNotAvailableException(name);

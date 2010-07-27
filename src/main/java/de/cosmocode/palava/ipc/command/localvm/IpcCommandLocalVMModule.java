@@ -18,9 +18,9 @@ package de.cosmocode.palava.ipc.command.localvm;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
-import com.google.inject.Singleton;
+
 import de.cosmocode.palava.ipc.IpcCommandExecutor;
-import de.cosmocode.palava.ipc.execvm.LocalExecutor;
+import de.cosmocode.palava.ipc.execvm.LocalExecutorModule;
 
 /**
  * Binds {@link IpcCommandExecutor} to {@link de.cosmocode.palava.ipc.execvm.LocalExecutor}.
@@ -35,7 +35,7 @@ public final class IpcCommandLocalVMModule implements Module {
 
     @Override
     public void configure(Binder binder) {
-        binder.bind(IpcCommandExecutor.class).to(LocalExecutor.class).in(Singleton.class);
+        binder.install(new LocalExecutorModule());
     }
 
 }
