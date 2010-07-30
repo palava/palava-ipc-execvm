@@ -22,13 +22,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import de.cosmocode.commons.reflect.Reflection;
 import de.cosmocode.palava.ipc.IpcCall;
-import de.cosmocode.palava.ipc.IpcCallFilterChain;
 import de.cosmocode.palava.ipc.IpcCallFilterChainFactory;
 import de.cosmocode.palava.ipc.IpcCommand;
 import de.cosmocode.palava.ipc.IpcCommandExecutionException;
@@ -56,7 +54,7 @@ final class LocalExecutor implements IpcCommandExecutor {
     }
 
     @Override
-    public Map<String, Object> execute(final String name, final IpcCall call) throws IpcCommandExecutionException {
+    public Map<String, Object> execute(String name, IpcCall call) throws IpcCommandExecutionException {
         Preconditions.checkNotNull(call, "Call");
 
         final Class<? extends IpcCommand> commandClass;
@@ -74,37 +72,6 @@ final class LocalExecutor implements IpcCommandExecutor {
 
         final IpcCommand command = injector.getInstance(commandClass);
         return chainFactory.create(ExecutingFilterChain.INSTANCE).filter(call, command);
-    }
-    
-    /**
-     * A {@link IpcCallFilterChain} implementation that executes the given command.
-     *
-     * @author Willi Schoenborn
-     */
-    private enum ExecutingFilterChain implements IpcCallFilterChain {
-        
-        INSTANCE;
-        
-        @Override
-        public Map<String, Object> filter(IpcCall call, IpcCommand command) throws IpcCommandExecutionException {
-            final Map<String, Object> result = Maps.newLinkedHashMap();
-            LOG.debug("Executing {}", command);
-            
-            try {
-                command.execute(call, result);
-            } catch (IpcCommandExecutionException e) {
-                LOG.debug("An expected exception was thrown while executing " + command, e);
-                throw e;
-                /* CHECKSTYLE:OFF */
-            } catch (RuntimeException e) {
-                /* CHECKSTYLE:ON */
-                LOG.error("An unexpected exception was thrown while executing " + command, e);
-                throw e;
-            }
-            
-            return result;
-        }
-        
     }
 
 }
