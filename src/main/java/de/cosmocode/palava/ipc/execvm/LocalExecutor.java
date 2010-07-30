@@ -73,8 +73,7 @@ final class LocalExecutor implements IpcCommandExecutor {
         }
 
         final IpcCommand command = injector.getInstance(commandClass);
-        final IpcCallFilterChain chain = chainFactory.create(ExecutingFilterChain.INSTANCE);
-        return chain.filter(call, command);
+        return chainFactory.create(ExecutingFilterChain.INSTANCE).filter(call, command);
     }
     
     /**
