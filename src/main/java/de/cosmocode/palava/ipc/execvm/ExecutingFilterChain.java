@@ -27,7 +27,7 @@ import de.cosmocode.palava.ipc.IpcCall;
 import de.cosmocode.palava.ipc.IpcCallFilterChain;
 import de.cosmocode.palava.ipc.IpcCommand;
 import de.cosmocode.palava.ipc.IpcCommandExecutionException;
-
+import de.cosmocode.palava.ipc.IpcCommands;
 
 /**
  * A {@link IpcCallFilterChain} implementation that executes the given command.
@@ -48,7 +48,11 @@ enum ExecutingFilterChain implements IpcCallFilterChain {
         try {
             command.execute(call, result);
         } catch (IpcCommandExecutionException e) {
-            LOG.debug("An expected exception was thrown while executing " + command, e);
+            if (e.getCause() == null || IpcCommands.mayThrow(command.getClass(), e.getCause())) {
+                LOG.debug("An expected exception was thrown while executing " + command, e);
+            } else {
+                LOG.error("An undeclared exception was thrown while executing " + command, e);
+            }
             throw e;
             /* CHECKSTYLE:OFF */
         } catch (RuntimeException e) {
