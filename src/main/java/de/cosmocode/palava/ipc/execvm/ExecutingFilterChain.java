@@ -16,18 +16,12 @@
 
 package de.cosmocode.palava.ipc.execvm;
 
-import java.util.Map;
-
+import com.google.common.collect.Maps;
+import de.cosmocode.palava.ipc.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Maps;
-
-import de.cosmocode.palava.ipc.IpcCall;
-import de.cosmocode.palava.ipc.IpcCallFilterChain;
-import de.cosmocode.palava.ipc.IpcCommand;
-import de.cosmocode.palava.ipc.IpcCommandExecutionException;
-import de.cosmocode.palava.ipc.IpcCommands;
+import java.util.Map;
 
 /**
  * A {@link IpcCallFilterChain} implementation that executes the given command.
@@ -57,7 +51,7 @@ enum ExecutingFilterChain implements IpcCallFilterChain {
             /* CHECKSTYLE:OFF */
         } catch (RuntimeException e) {
             /* CHECKSTYLE:ON */
-            if (e.getCause() == null || IpcCommands.mayThrow(command.getClass(), e.getCause())) {
+            if (IpcCommands.mayThrow(command.getClass(), e)) {
                 LOG.debug("An expected exception was thrown while executing " + command, e);
             } else {
                 LOG.error("An unexpected exception was thrown while executing " + command, e);
