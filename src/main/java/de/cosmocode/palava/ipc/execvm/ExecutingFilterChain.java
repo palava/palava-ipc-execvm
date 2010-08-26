@@ -16,12 +16,18 @@
 
 package de.cosmocode.palava.ipc.execvm;
 
-import com.google.common.collect.Maps;
-import de.cosmocode.palava.ipc.*;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
+import com.google.common.collect.Maps;
+
+import de.cosmocode.palava.ipc.IpcCall;
+import de.cosmocode.palava.ipc.IpcCallFilterChain;
+import de.cosmocode.palava.ipc.IpcCommand;
+import de.cosmocode.palava.ipc.IpcCommandExecutionException;
+import de.cosmocode.palava.ipc.IpcCommands;
 
 /**
  * A {@link IpcCallFilterChain} implementation that executes the given command.
