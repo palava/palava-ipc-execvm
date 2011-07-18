@@ -51,7 +51,8 @@ enum ExecutingFilterChain implements IpcCallFilterChain {
             if (e.getCause() == null || IpcCommands.mayThrow(command.getClass(), e.getCause())) {
                 LOG.debug("An expected exception was thrown while executing " + command, e);
             } else {
-                LOG.error("An undeclared exception was thrown while executing " + command, e);
+                LOG.error("An undeclared exception was thrown while executing " + command +
+                    " with arguments: " + call.getArguments(), e);
             }
             throw e;
             /* CHECKSTYLE:OFF */
@@ -60,7 +61,8 @@ enum ExecutingFilterChain implements IpcCallFilterChain {
             if (IpcCommands.mayThrow(command.getClass(), e)) {
                 LOG.debug("An expected exception was thrown while executing " + command, e);
             } else {
-                LOG.error("An unexpected exception was thrown while executing " + command, e);
+                LOG.error("An unexpected exception was thrown while executing " + command +
+                    " with arguments: " + call.getArguments(), e);
             }
             throw e;
         }
